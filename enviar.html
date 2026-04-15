@@ -57,80 +57,85 @@
     </div>
 
     <script>
-        const SUPABASE_URL = 'TEVA_URL';
-        const SUPABASE_KEY = 'TEVA_KEY';
-        const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // 1. Connexió amb Supabase
+    const SUPABASE_URL = 'https://xxx.supabase.co';
+    const SUPABASE_KEY = 'eyJhb...';
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Detectem si estem editant
-        const params = new URLSearchParams(window.location.search);
-        const editId = params.get('id');
+    // 2. Detectar si estem EDITANT o CREANT
+    const params = new URLSearchParams(window.location.search);
+    const editId = params.get('id');
+
+    // 3. Si hi ha ID, carregar les dades actuals al formulari
+    if (editId) {
+        async function carregarDades() {
+            const { data } = await client.from('m12').select('*').eq('id', editId).single();
+            if (data) {
+                document.getElementById('titol').value = data.titol;
+                document.getElementById('classe').value = data.classe;
+                document.getElementById('alumnes').value = data.alumnes;
+                document.getElementById('resum').value = data.resum;
+                document.getElementById('serveis').value = data.serveis;
+                // El PIN no el carreguem per seguretat, l'hauran de posar de nou
+            }
+        }
+        carregarDades();
+    }
+
+    // 4. LA LÒGICA DE VALIDACIÓ I ENVIAMENT
+    document.getElementById('meuForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('btnSubmit');
+        btn.disabled = true;
+        btn.innerText = "Validant dades...";
+
+        const dades = {
+            titol: document.getElementById('titol').value,
+            classe: document.getElementById('classe').value,
+            alumnes: document.getElementById('alumnes').value,
+            resum: document.getElementById('resum').value,
+            serveis: document.getElementById('serveis').value,
+            pin: document.getElementById('pin').value
+        };
 
         if (editId) {
-            document.getElementById('form-title').innerText = "Actualitzar Projecte";
-            document.getElementById('form-subtitle').innerText = "Modifica les dades i confirma amb el teu PIN";
-            document.getElementById('header-color').classList.replace('bg-indigo-600', 'bg-emerald-600');
-            document.getElementById('btnSubmit').classList.replace('bg-indigo-600', 'bg-emerald-600');
-            document.getElementById('btnSubmit').innerText = "Guardar Canvis";
-            document.getElementById('pin-label').innerText = "Escriu el PIN per confirmar canvis:";
-
-            // Carreguem les dades actuals (menys el PIN, que és secret)
-            async function carregarDades() {
-                const { data } = await client.from('m12').select('*').eq('id', editId).single();
-                if (data) {
-                    document.getElementById('titol').value = data.titol;
-                    document.getElementById('classe').value = data.classe;
-                    document.getElementById('alumnes').value = data.alumnes;
-                    document.getElementById('resum').value = data.resum;
-                    document.getElementById('serveis').value = data.serveis;
-                }
+            // --- LÒGICA PER ACTUALITZAR ---
+            // Primer comprovem si el PIN és correcte
+            const { data: projecte } = await client.from('m12').select('pin').eq('id', editId).single();
+            
+            if (projecte.pin !== dades.pin) {
+                alert("❌ PIN incorrecte. No pots modificar aquest projecte.");
+                btn.disabled = false;
+                btn.innerText = "Guardar Canvis";
+                return;
             }
-            carregarDades();
+
+            const { error } = await client.from('m12').update(dades).eq('id', editId);
+            if (!error) alert("✅ Actualitzat correctament!");
+            
+        } else {
+            // --- LÒGICA PER CREAR NOU ---
+            // Validem que no existeixi el grup a la classe
+            const { data: existent } = await client.from('m12')
+                .select('id')
+                .eq('classe', dades.classe)
+                .eq('alumnes', dades.alumnes)
+                .maybeSingle();
+
+            if (existent) {
+                alert("⚠️ Aquest grup ja té un projecte a " + dades.classe + ". Busca'l a la galeria per editar-lo.");
+                btn.disabled = false;
+                btn.innerText = "Publicar Projecte";
+                return;
+            }
+
+            const { error } = await client.from('m12').insert([dades]);
+            if (!error) alert("🚀 Projecte creat amb èxit!");
         }
 
-        document.getElementById('meuForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btnSubmit');
-            btn.disabled = true;
-            btn.innerText = "Processant...";
-
-            const dades = {
-                titol: document.getElementById('titol').value,
-                classe: document.getElementById('classe').value,
-                alumnes: document.getElementById('alumnes').value,
-                resum: document.getElementById('resum').value,
-                serveis: document.getElementById('serveis').value,
-                pin: document.getElementById('pin').value
-            };
-
-            let error;
-
-            if (editId) {
-                // Lògica d'UPDATE: Només actualitza si l'ID i el PIN coincideixen
-                const res = await client.from('m12')
-                    .update(dades)
-                    .eq('id', editId)
-                    .eq('pin', dades.pin); // <-- SEGURETAT
-                
-                // Supabase no torna error si el PIN és incorrecte però no troba la fila, 
-                // hem de comprovar si s'ha actualitzat alguna cosa.
-                if (res.status === 204 || res.status === 200) {
-                   alert("Projecte actualitzat!");
-                   window.location.href = "index.html";
-                } else {
-                   alert("Error: PIN incorrecte o problema de connexió.");
-                }
-            } else {
-                // Lògica d'INSERT
-                const res = await client.from('m12').insert([dades]);
-                if (res.error) alert("Error: " + res.error.message);
-                else {
-                    alert("Creat amb èxit!");
-                    window.location.href = "index.html";
-                }
-            }
-            
-            btn.disabled = false;
-        };
-    </script>
+        window.location.href = "index.html";
+    };
+</script>
+</body>
 </body>
 </html>
