@@ -17,13 +17,13 @@
 
     <script>
         // 1. Configura les teves claus de Supabase aquí
-        const SUPABASE_URL = 'TEVA_URL_DE_SUPABASE';
-        const SUPABASE_KEY = 'TEVA_ANON_KEY_DE_SUPABASE';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const SUPABASE_URL = 'https://cofbagngimtwfgzpdggp.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNvZmJhZ25naW10d2ZnenBkZ2dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMzAyNDIsImV4cCI6MjA5MTgwNjI0Mn0.uuXWL-UnEPfUjf7iJXUUq7MRBLLr8GA2mLwXYibk1Vk';
+        const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         async function carregarProjectes() {
-            const { data, error } = await supabase
-                .from('proyectos')
+            const { data, error } = await client
+                .from('m12')
                 .select('*');
 
             if (error) console.error(error);
