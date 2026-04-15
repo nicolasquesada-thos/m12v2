@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <title>Publicar Projecte - M12</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
+
+    <div class="max-w-xl w-full bg-white shadow-xl rounded-2xl overflow-hidden">
+        <div class="bg-indigo-600 p-6 text-white text-center">
+            <h1 class="text-2xl font-bold">Nou Projecte</h1>
+            <p class="text-indigo-100 text-sm">Omple les dades per aparèixer a la galeria</p>
+        </div>
+
+        <form id="meuForm" class="p-8 space-y-5">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Títol del Projecte</label>
+                <input type="text" id="titol" class="w-full border-gray-200 border-2 p-2.5 rounded-lg focus:border-indigo-500 outline-none transition-all" placeholder="Ex: App de Gestió" required>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Classe</label>
+                    <select id="classe" class="w-full border-gray-200 border-2 p-2.5 rounded-lg focus:border-indigo-500 outline-none">
+                        <option>G1</option><option>G2</option><option>G3</option>
+                        <option>G4</option><option>G5</option><option>G6</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Alumnes</label>
+                    <input type="text" id="alumnes" class="w-full border-gray-200 border-2 p-2.5 rounded-lg focus:border-indigo-500 outline-none" placeholder="Ex: Nil i Eva" required>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Resum</label>
+                <textarea id="resum" rows="3" class="w-full border-gray-200 border-2 p-2.5 rounded-lg focus:border-indigo-500 outline-none" placeholder="Explica breument què fa el projecte" required></textarea>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Serveis (separats per comes)</label>
+                <input type="text" id="serveis" class="w-full border-gray-200 border-2 p-2.5 rounded-lg focus:border-indigo-500 outline-none" placeholder="Ex: Arduino, API, CSS">
+            </div>
+
+            <button type="submit" id="btnEnviar" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition-all transform active:scale-95 shadow-lg shadow-indigo-200">
+                Publicar Projecte
+            </button>
+            
+            <div class="text-center">
+                <a href="index.html" class="text-indigo-500 text-sm hover:underline">← Tornar a la galeria</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'TEVA_URL';
+        const SUPABASE_KEY = 'TEVA_KEY';
+        const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        document.getElementById('meuForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnEnviar');
+            btn.innerText = "Sincronitzant amb Supabase...";
+            btn.disabled = true;
+
+            const { error } = await client
+                .from('m12')
+                .insert([{
+                    titol: document.getElementById('titol').value,
+                    classe: document.getElementById('classe').value,
+                    alumnes: document.getElementById('alumnes').value,
+                    resum: document.getElementById('resum').value,
+                    serveis: document.getElementById('serveis').value
+                }]);
+
+            if (error) {
+                alert("Error al guardar: " + error.message);
+                btn.innerText = "Publicar Projecte";
+                btn.disabled = false;
+            } else {
+                alert("Projecte publicat correctament!");
+                window.location.href = "index.html";
+            }
+        };
+    </script>
+</body>
+</html>
