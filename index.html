@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <title>Showcase de Projectes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8 text-center">Projectes dels Alumnes</h1>
+        
+        <div id="projectes-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+    </div>
+
+    <script>
+        // 1. Configura les teves claus de Supabase aquí
+        const SUPABASE_URL = 'https://cofbagngimtwfgzpdggp.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNvZmJhZ25naW10d2ZnenBkZ2dwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMzAyNDIsImV4cCI6MjA5MTgwNjI0Mn0.uuXWL-UnEPfUjf7iJXUUq7MRBLLr8GA2mLwXYibk1Vk';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function carregarProjectes() {
+            const { data, error } = await supabase
+                .from('proyectos')
+                .select('*');
+
+            if (error) console.error(error);
+
+            const container = document.getElementById('projectes-container');
+            
+            data.forEach(projecte => {
+                // Generem les icones segons els serveis
+                const icones = projecte.serveis.split(',').map(s => 
+                    `<span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">${s.trim()}</span>`
+                ).join(' ');
+
+                container.innerHTML += `
+                    <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-sm font-bold text-indigo-600">${projecte.classe}</span>
+                            <div class="flex gap-1">${icones}</div>
+                        </div>
+                        <h2 class="text-xl font-bold mb-2">${projecte.titol}</h2>
+                        <p class="text-gray-600 text-sm mb-4">${projecte.resum}</p>
+                        <p class="text-xs text-gray-400">Grup: ${projecte.alumnes}</p>
+                        <button class="mt-4 w-full bg-gray-50 hover:bg-gray-100 text-gray-700 font-bold py-2 rounded border border-gray-200 text-sm">
+                            + Veure més
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        carregarProjectes();
+    </script>
+</body>
+</html>
