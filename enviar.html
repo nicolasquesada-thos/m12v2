@@ -2,55 +2,57 @@
 <html lang="ca">
 <head>
     <meta charset="UTF-8">
-    <title>Publicar Projecte - M12</title>
+    <title>Gestió de Projecte - M12</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
+<body class="bg-slate-50 min-h-screen p-4 flex items-center justify-center">
 
-    <div class="max-w-xl w-full bg-white shadow-xl rounded-2xl overflow-hidden">
-        <div class="bg-indigo-600 p-6 text-white text-center">
-            <h1 class="text-2xl font-bold">Nou Projecte</h1>
-            <p class="text-indigo-100 text-sm">Omple les dades per aparèixer a la galeria</p>
+    <div class="max-w-xl w-full bg-white shadow-2xl rounded-2xl overflow-hidden">
+        <div id="header-color" class="bg-indigo-600 p-6 text-white text-center">
+            <h1 id="form-title" class="text-2xl font-bold">Nou Projecte</h1>
+            <p id="form-subtitle" class="text-indigo-100 text-sm">Introdueix les dades i un PIN de seguretat</p>
         </div>
 
-        <form id="meuForm" class="p-8 space-y-5">
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Títol del Projecte</label>
-                <input type="text" id="titol" class="w-full border-gray-200 border-2 p-2.5 rounded-lg focus:border-indigo-500 outline-none transition-all" placeholder="Ex: App de Gestió" required>
-            </div>
-
+        <form id="meuForm" class="p-8 space-y-4">
             <div class="grid grid-cols-2 gap-4">
+                <div class="col-span-2">
+                    <label class="block text-xs font-bold text-gray-400 uppercase">Títol</label>
+                    <input type="text" id="titol" class="w-full border-b-2 p-2 outline-none focus:border-indigo-500" required>
+                </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Classe</label>
-                    <select id="classe" class="w-full border-gray-200 border-2 p-2.5 rounded-lg focus:border-indigo-500 outline-none">
-                        <option>G1</option><option>G2</option><option>G3</option>
-                        <option>G4</option><option>G5</option><option>G6</option>
+                    <label class="block text-xs font-bold text-gray-400 uppercase">Classe</label>
+                    <select id="classe" class="w-full border-b-2 p-2 outline-none focus:border-indigo-500">
+                        <option>G1</option><option>G2</option><option>G3</option><option>G4</option><option>G5</option><option>G6</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Alumnes</label>
-                    <input type="text" id="alumnes" class="w-full border-gray-200 border-2 p-2.5 rounded-lg focus:border-indigo-500 outline-none" placeholder="Ex: Nil i Eva" required>
+                    <label class="block text-xs font-bold text-gray-400 uppercase">Alumnes</label>
+                    <input type="text" id="alumnes" class="w-full border-b-2 p-2 outline-none focus:border-indigo-500" required>
                 </div>
             </div>
 
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Resum</label>
-                <textarea id="resum" rows="3" class="w-full border-gray-200 border-2 p-2.5 rounded-lg focus:border-indigo-500 outline-none" placeholder="Explica breument què fa el projecte" required></textarea>
+                <label class="block text-xs font-bold text-gray-400 uppercase">Resum</label>
+                <textarea id="resum" rows="3" class="w-full border-2 p-2 rounded-lg outline-none focus:border-indigo-500" required></textarea>
             </div>
 
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Serveis (separats per comes)</label>
-                <input type="text" id="serveis" class="w-full border-gray-200 border-2 p-2.5 rounded-lg focus:border-indigo-500 outline-none" placeholder="Ex: Arduino, API, CSS">
+                <label class="block text-xs font-bold text-gray-400 uppercase">Serveis (separats per comes)</label>
+                <input type="text" id="serveis" class="w-full border-b-2 p-2 outline-none focus:border-indigo-500" placeholder="Ex: Web, API, DB">
             </div>
 
-            <button type="submit" id="btnEnviar" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition-all transform active:scale-95 shadow-lg shadow-indigo-200">
+            <div class="bg-amber-50 p-4 rounded-xl border border-amber-100">
+                <label id="pin-label" class="block text-sm font-bold text-amber-800 mb-1">Crea un PIN de seguretat:</label>
+                <input type="password" id="pin" class="w-full p-2 rounded border-amber-200 border outline-none focus:ring-2 focus:ring-amber-400" placeholder="Ex: 1234" required>
+                <p class="text-xs text-amber-600 mt-1">Necessitaràs aquest PIN per modificar el projecte més endavant.</p>
+            </div>
+
+            <button type="submit" id="btnSubmit" class="w-full bg-indigo-600 text-white font-bold py-4 rounded-xl hover:bg-indigo-700 transition-all shadow-lg">
                 Publicar Projecte
             </button>
             
-            <div class="text-center">
-                <a href="index.html" class="text-indigo-500 text-sm hover:underline">← Tornar a la galeria</a>
-            </div>
+            <a href="index.html" class="block text-center text-gray-400 text-sm hover:text-indigo-600">Torna enrere</a>
         </form>
     </div>
 
@@ -59,30 +61,75 @@
         const SUPABASE_KEY = 'TEVA_KEY';
         const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // Detectem si estem editant
+        const params = new URLSearchParams(window.location.search);
+        const editId = params.get('id');
+
+        if (editId) {
+            document.getElementById('form-title').innerText = "Actualitzar Projecte";
+            document.getElementById('form-subtitle').innerText = "Modifica les dades i confirma amb el teu PIN";
+            document.getElementById('header-color').classList.replace('bg-indigo-600', 'bg-emerald-600');
+            document.getElementById('btnSubmit').classList.replace('bg-indigo-600', 'bg-emerald-600');
+            document.getElementById('btnSubmit').innerText = "Guardar Canvis";
+            document.getElementById('pin-label').innerText = "Escriu el PIN per confirmar canvis:";
+
+            // Carreguem les dades actuals (menys el PIN, que és secret)
+            async function carregarDades() {
+                const { data } = await client.from('m12').select('*').eq('id', editId).single();
+                if (data) {
+                    document.getElementById('titol').value = data.titol;
+                    document.getElementById('classe').value = data.classe;
+                    document.getElementById('alumnes').value = data.alumnes;
+                    document.getElementById('resum').value = data.resum;
+                    document.getElementById('serveis').value = data.serveis;
+                }
+            }
+            carregarDades();
+        }
+
         document.getElementById('meuForm').onsubmit = async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('btnEnviar');
-            btn.innerText = "Sincronitzant amb Supabase...";
+            const btn = document.getElementById('btnSubmit');
             btn.disabled = true;
+            btn.innerText = "Processant...";
 
-            const { error } = await client
-                .from('m12')
-                .insert([{
-                    titol: document.getElementById('titol').value,
-                    classe: document.getElementById('classe').value,
-                    alumnes: document.getElementById('alumnes').value,
-                    resum: document.getElementById('resum').value,
-                    serveis: document.getElementById('serveis').value
-                }]);
+            const dades = {
+                titol: document.getElementById('titol').value,
+                classe: document.getElementById('classe').value,
+                alumnes: document.getElementById('alumnes').value,
+                resum: document.getElementById('resum').value,
+                serveis: document.getElementById('serveis').value,
+                pin: document.getElementById('pin').value
+            };
 
-            if (error) {
-                alert("Error al guardar: " + error.message);
-                btn.innerText = "Publicar Projecte";
-                btn.disabled = false;
+            let error;
+
+            if (editId) {
+                // Lògica d'UPDATE: Només actualitza si l'ID i el PIN coincideixen
+                const res = await client.from('m12')
+                    .update(dades)
+                    .eq('id', editId)
+                    .eq('pin', dades.pin); // <-- SEGURETAT
+                
+                // Supabase no torna error si el PIN és incorrecte però no troba la fila, 
+                // hem de comprovar si s'ha actualitzat alguna cosa.
+                if (res.status === 204 || res.status === 200) {
+                   alert("Projecte actualitzat!");
+                   window.location.href = "index.html";
+                } else {
+                   alert("Error: PIN incorrecte o problema de connexió.");
+                }
             } else {
-                alert("Projecte publicat correctament!");
-                window.location.href = "index.html";
+                // Lògica d'INSERT
+                const res = await client.from('m12').insert([dades]);
+                if (res.error) alert("Error: " + res.error.message);
+                else {
+                    alert("Creat amb èxit!");
+                    window.location.href = "index.html";
+                }
             }
+            
+            btn.disabled = false;
         };
     </script>
 </body>
